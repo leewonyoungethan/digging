@@ -72,12 +72,17 @@ export function DirtCore() {
 
   return (
     <group>
+      {/* 보이지 않는 넉넉한 히트박스 — 회전하는 뾰족한 모서리를 정확히 맞추지 않아도 클릭되도록 */}
       <mesh
-        ref={meshRef}
         onClick={handleClick}
         onPointerOver={() => (document.body.style.cursor = 'pointer')}
         onPointerOut={() => (document.body.style.cursor = 'auto')}
       >
+        <sphereGeometry args={[1.9, 16, 16]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+
+      <mesh ref={meshRef}>
         <icosahedronGeometry args={[1.3, 0]} />
         <meshStandardMaterial color="#8a5a34" roughness={0.85} flatShading />
       </mesh>
