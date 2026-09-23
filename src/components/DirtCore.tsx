@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore } from '../store';
 
-const PARTICLE_COUNT = 16;
+const PARTICLE_COUNT = 24;
 
 interface ParticleData {
   position: THREE.Vector3;
@@ -18,6 +18,7 @@ function createParticle(): ParticleData {
 export function DirtCore() {
   const dig = useGameStore((s) => s.dig);
   const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const particlesRef = useRef<THREE.InstancedMesh>(null);
   const punch = useRef(0);
   const particles = useRef<ParticleData[]>(
@@ -31,14 +32,14 @@ export function DirtCore() {
     dig();
     punch.current = 1;
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 10; i++) {
       const p = particles.current[nextParticle.current];
       nextParticle.current = (nextParticle.current + 1) % PARTICLE_COUNT;
       p.position.set(0, 0, 0.8);
       p.velocity.set(
-        (Math.random() - 0.5) * 3.5,
-        Math.random() * 2.5 + 0.5,
-        (Math.random() - 0.5) * 2 + 1.5,
+        (Math.random() - 0.5) * 4.5,
+        Math.random() * 3 + 1,
+        (Math.random() - 0.5) * 2.5 + 1.8,
       );
       p.life = 1;
     }
@@ -46,11 +47,15 @@ export function DirtCore() {
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      punch.current = Math.max(0, punch.current - delta * 6);
-      const scale = 1 + punch.current * 0.18;
+      punch.current = Math.max(0, punch.current - delta * 4);
+      const scale = 1 + punch.current * 0.45;
       meshRef.current.scale.setScalar(scale);
       meshRef.current.rotation.y += delta * 0.25;
       meshRef.current.rotation.x += delta * 0.08;
+    }
+
+    if (materialRef.current) {
+      materialRef.current.emissiveIntensity = punch.current * 1.5;
     }
 
     if (particlesRef.current) {
@@ -84,7 +89,14 @@ export function DirtCore() {
 
       <mesh ref={meshRef}>
         <icosahedronGeometry args={[1.3, 0]} />
-        <meshStandardMaterial color="#8a5a34" roughness={0.85} flatShading />
+        <meshStandardMaterial
+          ref={materialRef}
+          color="#8a5a34"
+          roughness={0.85}
+          flatShading
+          emissive="#ffcf8a"
+          emissiveIntensity={0}
+        />
       </mesh>
       <instancedMesh ref={particlesRef} args={[undefined, undefined, PARTICLE_COUNT]}>
         <boxGeometry args={[1, 1, 1]} />
